@@ -8,8 +8,6 @@ namespace MazeGenerator
 {
     class Maze
     {
-        private string _size;
-
         public int MazeID { get; set; }
 
         public int Width { get; set; }

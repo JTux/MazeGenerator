@@ -6,10 +6,13 @@ using System.Threading.Tasks;
 
 namespace MazeGenerator
 {
+    public enum CoordType { Start=1, Wall, Empty, End }
+
     class Coordinate
     {
         public int XCoord { get; set; }
         public int YCoord { get; set; }
+        public CoordType Type { get; set; }
 
         public override string ToString()
         {

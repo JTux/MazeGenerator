@@ -21,29 +21,29 @@ namespace MazeGenerator
                 Width = 6,
                 Height = 6,
                 Size = $"6 x 6",
-                StartCoord = new Coordinate { XCoord = 0, YCoord = 1 },
-                EndCoord = new Coordinate { XCoord = 5, YCoord = 5 },
+                StartCoord = new Coordinate { XCoord = 1, YCoord = 0, Type = CoordType.Start },
+                EndCoord = new Coordinate { XCoord = 2, YCoord = 3, Type = CoordType.End },
                 Walls = new Wall
                 {
                     WallCoords = new List<Coordinate>
                     {
-                        new Coordinate{ XCoord = 0, YCoord = 0 },
-                        new Coordinate{ XCoord = 0, YCoord = 1 },
-                        new Coordinate{ XCoord = 0, YCoord = 2 },
-                        new Coordinate{ XCoord = 1, YCoord = 2 },
-                        new Coordinate{ XCoord = 1, YCoord = 4 },
-                        new Coordinate{ XCoord = 2, YCoord = 0 },
-                        new Coordinate{ XCoord = 2, YCoord = 2 },
-                        new Coordinate{ XCoord = 2, YCoord = 4 },
-                        new Coordinate{ XCoord = 3, YCoord = 0 },
-                        new Coordinate{ XCoord = 3, YCoord = 2 },
-                        new Coordinate{ XCoord = 3, YCoord = 3 },
-                        new Coordinate{ XCoord = 3, YCoord = 4 },
-                        new Coordinate{ XCoord = 4, YCoord = 0 },
-                        new Coordinate{ XCoord = 5, YCoord = 0 },
-                        new Coordinate{ XCoord = 5, YCoord = 2 },
-                        new Coordinate{ XCoord = 5, YCoord = 3 },
-                        new Coordinate{ XCoord = 5, YCoord = 5 },
+                        new Coordinate{ XCoord = 0, YCoord = 0, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 0, YCoord = 1, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 0, YCoord = 2, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 1, YCoord = 2, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 1, YCoord = 4, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 2, YCoord = 0, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 2, YCoord = 2, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 2, YCoord = 4, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 3, YCoord = 0, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 3, YCoord = 2, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 3, YCoord = 3, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 3, YCoord = 4, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 4, YCoord = 0, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 5, YCoord = 0, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 5, YCoord = 2, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 5, YCoord = 3, Type = CoordType.Wall },
+                        new Coordinate{ XCoord = 5, YCoord = 5, Type = CoordType.Wall },
                     }
                 }
             };
@@ -124,7 +124,11 @@ namespace MazeGenerator
 
         public void PrintMaze(Maze maze)
         {
-            List<Coordinate> sortedList = maze.Walls.WallCoords.OrderBy(s => s.XCoord).ThenBy(s => s.YCoord).ToList();
+            List<Coordinate> buildList = maze.Walls.WallCoords;
+            buildList.Add(maze.StartCoord);
+            buildList.Add(maze.EndCoord);
+
+            List<Coordinate> sortedList = buildList.OrderBy(s => s.XCoord).ThenBy(s => s.YCoord).ToList();
             foreach (Coordinate coord in sortedList)
             {
                 Console.WriteLine(coord);
@@ -138,15 +142,16 @@ namespace MazeGenerator
                 {
                     Coordinate testCoord = new Coordinate
                     {
-                        XCoord = c,
-                        YCoord = r
+                        XCoord = r,
+                        YCoord = c
                     };
 
-                    //Checks if the current spot is a wall or not and assigns it the corresponding value
-                    var result = sortedList.Find(x => x.XCoord == r && x.YCoord == c);
+                    //Checks the current spot and assigns it the appropriate value
+                    var result = sortedList.Find(x => x.XCoord == c && x.YCoord == r);
                     if (result != null)
                     {
-                        if (result == maze.StartCoord) Console.Write("SS");
+                        if (result.XCoord == maze.StartCoord.XCoord && result.YCoord == maze.StartCoord.YCoord) Console.Write("SS");
+                        else if (result.XCoord == maze.EndCoord.XCoord && result.YCoord == maze.EndCoord.YCoord) Console.Write("EE");
                         else Console.Write("[]");
                     }
                     else Console.Write("  ");
@@ -218,7 +223,8 @@ namespace MazeGenerator
             var newCoord = new Coordinate
             {
                 XCoord = newX,
-                YCoord = newY
+                YCoord = newY,
+                Type = CoordType.Wall
             };
 
             return newCoord;
