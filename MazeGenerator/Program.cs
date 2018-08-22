@@ -12,7 +12,9 @@ namespace MazeGenerator
         {
             ProgramUI program = new ProgramUI();
 
-            program.CreateMaze();
+            program.SeedMazeList();
+
+            //program.CreateMaze();
 
             program.ViewMaze();
 

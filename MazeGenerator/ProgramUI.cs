@@ -12,6 +12,44 @@ namespace MazeGenerator
 
         private int _mazeCount = 0;
 
+        public void SeedMazeList()
+        {
+            _mazeCount++;
+            var newMaze = new Maze
+            {
+                MazeID = _mazeCount,
+                Width = 6,
+                Height = 6,
+                Size = $"6 x 6",
+                StartCoord = new Coordinate { XCoord = 0, YCoord = 1 },
+                EndCoord = new Coordinate { XCoord = 5, YCoord = 5 },
+                Walls = new Wall
+                {
+                    WallCoords = new List<Coordinate>
+                    {
+                        new Coordinate{ XCoord = 0, YCoord = 0 },
+                        new Coordinate{ XCoord = 0, YCoord = 1 },
+                        new Coordinate{ XCoord = 0, YCoord = 2 },
+                        new Coordinate{ XCoord = 1, YCoord = 2 },
+                        new Coordinate{ XCoord = 1, YCoord = 4 },
+                        new Coordinate{ XCoord = 2, YCoord = 0 },
+                        new Coordinate{ XCoord = 2, YCoord = 2 },
+                        new Coordinate{ XCoord = 2, YCoord = 4 },
+                        new Coordinate{ XCoord = 3, YCoord = 0 },
+                        new Coordinate{ XCoord = 3, YCoord = 2 },
+                        new Coordinate{ XCoord = 3, YCoord = 3 },
+                        new Coordinate{ XCoord = 3, YCoord = 4 },
+                        new Coordinate{ XCoord = 4, YCoord = 0 },
+                        new Coordinate{ XCoord = 5, YCoord = 0 },
+                        new Coordinate{ XCoord = 5, YCoord = 2 },
+                        new Coordinate{ XCoord = 5, YCoord = 3 },
+                        new Coordinate{ XCoord = 5, YCoord = 5 },
+                    }
+                }
+            };
+            _mazeList.Add(newMaze);
+        }
+
         public void CreateMaze()
         {
             Console.Clear();
@@ -100,17 +138,18 @@ namespace MazeGenerator
                 {
                     Coordinate testCoord = new Coordinate
                     {
-                        XCoord = r,
-                        YCoord = c
+                        XCoord = c,
+                        YCoord = r
                     };
 
                     //Checks if the current spot is a wall or not and assigns it the corresponding value
                     var result = sortedList.Find(x => x.XCoord == r && x.YCoord == c);
                     if (result != null)
                     {
-                        Console.Write(" [] ");
+                        if (result == maze.StartCoord) Console.Write("SS");
+                        else Console.Write("[]");
                     }
-                    else Console.Write("    ");
+                    else Console.Write("  ");
                 }
                 Console.WriteLine();
             }
