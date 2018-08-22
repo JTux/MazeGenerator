@@ -111,6 +111,63 @@ namespace MazeGenerator
             _mazeList.Add(newMaze);
         }
 
+        //-- Method to create the list of walls that will be passed into the Maze
+        private Wall CreateWalls(int width, int height, Coordinate start, Coordinate end)
+        {
+            var newWall = new Wall();
+            var newWallList = new List<Coordinate>();
+
+            Console.Clear();
+
+            var prompt = $"Enter Wall Coordinates: \n" +
+                         $"Start:({start})  End:({end})";
+
+            //-- Loops until the user decides they are done creating walls
+            var creatingWalls = true;
+            while (creatingWalls)
+            {
+                //-- Creates new Coordinate and adds it to the list
+                Coordinate newCoord = new Coordinate();
+
+                //-- Checks to make sure the user does not create an Wall at the same place they created the Start or End
+                while (true)
+                {
+                    newCoord = CreateCoord(prompt, width, height, CoordType.Wall);
+                    if ((newCoord.XCoord != start.XCoord || newCoord.YCoord != start.YCoord) && (newCoord.XCoord != end.XCoord || newCoord.YCoord != end.YCoord))
+                        break;
+                    Console.WriteLine($"Walls cannot be placed on the Start or End.");
+                    Console.ReadLine();
+                }
+
+                newWallList.Add(newCoord);
+
+                //-- Check to add another wall coordinate
+                var validResponse = true;
+                while (validResponse)
+                {
+                    Console.Write("Would you like to add another wall? (Y/N): ");
+                    string response = Console.ReadLine().ToLower();
+
+                    if (response == "n")
+                    {
+                        //-- Escapes out of adding walls to list
+                        creatingWalls = false;
+                        validResponse = false;
+                    }
+                    else if (response == "y")
+                        //-- Returns you to creating walls
+                        break;
+                    else
+                        Console.WriteLine("Invalid Input");
+                }
+            }
+
+            //-- Sets new list to the list associated with the Wall
+            newWall.WallCoords = newWallList;
+
+            return newWall;
+        }
+
         //-- Method that can be called by the program to offer a list of mazes and then output the selected one
         public void ViewMaze()
         {
@@ -185,52 +242,6 @@ namespace MazeGenerator
             Console.Clear();
             ListMazes("Which maze would you like to edit?");
 
-        }
-
-        //-- Method to create the list of walls that will be passed into the Maze
-        private Wall CreateWalls(int width, int height, Coordinate start, Coordinate end)
-        {
-            var newWall = new Wall();
-            var newWallList = new List<Coordinate>();
-
-            Console.Clear();
-
-            var prompt = $"Enter Wall Coordinates: \n" +
-                         $"Start:({start})  End:({end})";
-
-            //-- Loops until the user decides they are done creating walls
-            var creatingWalls = true;
-            while (creatingWalls)
-            {
-                //-- Creates new Coordinate and adds it to the list
-                var newCoord = CreateCoord(prompt, width, height, CoordType.Wall);
-                newWallList.Add(newCoord);
-
-                //-- Check to add another wall coordinate
-                var validResponse = true;
-                while (validResponse)
-                {
-                    Console.Write("Would you like to add another wall? (Y/N): ");
-                    string response = Console.ReadLine().ToLower();
-
-                    if (response == "n")
-                    {
-                        //-- Escapes out of adding walls to list
-                        creatingWalls = false;
-                        validResponse = false;
-                    }
-                    else if (response == "y")
-                        //-- Returns you to creating walls
-                        break;
-                    else
-                        Console.WriteLine("Invalid Input");
-                }
-            }
-
-            //-- Sets new list to the list associated with the Wall
-            newWall.WallCoords = newWallList;
-
-            return newWall;
         }
 
         //-- Helper method that creates a new Coordinate object
