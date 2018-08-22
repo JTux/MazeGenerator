@@ -16,19 +16,39 @@ namespace MazeGenerator
         {
             Console.Clear();
 
-            Console.Write("Enter maze width: ");
-            var mazeWidth = Int32.Parse(Console.ReadLine());
+            //The Width and Height are given default values that will be changed
+            int mazeWidth = 5;
+            int mazeHeight = 5;
 
-            Console.Write("Enter maze height: ");
-            var mazeHeight = Int32.Parse(Console.ReadLine());
+            var sizeCheck = true;
 
+            //Checks to make sure the width and height are numbers and are not smaller than 5
+            while (sizeCheck)
+            {
+                Console.Write("Enter maze width: ");
+                mazeWidth = ParseIntput();
+                if (!(mazeWidth < 5)) break;
+                else Console.WriteLine("Please enter a width greater than 4.");
+            }
+            while (sizeCheck)
+            {
+                Console.Write("Enter maze height: ");
+                mazeHeight = ParseIntput();
+                if (!(mazeHeight < 5)) break;
+                else Console.WriteLine("Please enter a width greater than 4.");
+            }
+
+            //Uses the CreateCoord helper method to create Coordinates
             var newStart = CreateCoord("Enter Start Coordinate: ");
             var newEnd = CreateCoord("Enter End Coordinate: ");
 
+            //Updates the mazecount so it can assign each maze a unique ID
             _mazeCount++;
 
+            //Calls the method that sets a loop for users to create as many wall objects as they want
             var newWall = CreateWalls();
 
+            //Creates the new Maze based on all the values the user has input thus far
             var newMaze = new Maze
             {
                 MazeID = _mazeCount,
@@ -40,6 +60,7 @@ namespace MazeGenerator
                 Walls = newWall
             };
 
+            //Adds the new maze to the list
             _mazeList.Add(newMaze);
         }
 
@@ -49,11 +70,13 @@ namespace MazeGenerator
             ListMazes("Which maze would you like to view?");
             var seeMaze = Int32.Parse(Console.ReadLine());
 
+            //Checks the list of Mazes for the id number the user entered and then prints it
             foreach (Maze maze in _mazeList)
             {
                 Console.Clear();
                 if (maze.MazeID == seeMaze)
                 {
+                    //Calls PrintMaze method and passes through the Maze it found that matches the user's request
                     PrintMaze(maze);
                     break;
                 }
@@ -70,9 +93,9 @@ namespace MazeGenerator
             }
 
             Console.Clear();
+            //Creates one row at a time, checking each column as it goes
             for (int r = 0; r < maze.Height; r++)
             {
-                var rowNum = r;
                 for (int c = 0; c < maze.Width; c++)
                 {
                     Coordinate testCoord = new Coordinate
@@ -81,13 +104,13 @@ namespace MazeGenerator
                         YCoord = c
                     };
 
+                    //Checks if the current spot is a wall or not and assigns it the corresponding value
                     var result = sortedList.Find(x => x.XCoord == r && x.YCoord == c);
                     if (result != null)
                     {
-                        if (result.ToString() == testCoord.ToString()) Console.Write(" X ");
-                        else Console.Write(" - ");
+                        Console.Write(" [] ");
                     }
-                    else Console.Write(" + ");
+                    else Console.Write("    ");
                 }
                 Console.WriteLine();
             }
@@ -108,6 +131,7 @@ namespace MazeGenerator
             Console.Clear();
             Console.WriteLine("Let's build a wall! #MakeMazesGreatAgain #NoRagrets");
 
+            //Loops until the user decides they are done creating walls
             var creatingWalls = true;
             while (creatingWalls)
             {
@@ -119,7 +143,7 @@ namespace MazeGenerator
                 var validResponse = true;
                 while (validResponse)
                 {
-                    Console.Write("Would you like to add another wall? (Y/N)");
+                    Console.Write("Would you like to add another wall? (Y/N): ");
                     string response = Console.ReadLine().ToLower();
 
                     if (response == "n")
@@ -142,13 +166,15 @@ namespace MazeGenerator
             return newWall;
         }
 
+        //Helper method that creates a new Coordinate object
         private Coordinate CreateCoord(string prompt)
         {
             Console.WriteLine(prompt);
             Console.Write("X: ");
-            var newX = Int32.Parse(Console.ReadLine());
+            var newX = ParseIntput();
+
             Console.Write("Y: ");
-            var newY = Int32.Parse(Console.ReadLine());
+            var newY = ParseIntput();
 
             var newCoord = new Coordinate
             {
@@ -159,6 +185,7 @@ namespace MazeGenerator
             return newCoord;
         }
 
+        //Helper method that prints the id number for each maze
         private void ListMazes(string prompt)
         {
             Console.WriteLine(prompt);
@@ -166,6 +193,20 @@ namespace MazeGenerator
             {
                 Console.WriteLine(maze.MazeID);
             }
+        }
+
+        //Helper method that makes sure input is a valid number
+        private int ParseIntput()
+        {
+            int value;
+            while (true)
+            {
+                var newXAsString = Console.ReadLine();
+                var parse = Int32.TryParse(newXAsString, out value);
+                if (parse) break;
+                else Console.Write("Please enter a valid number: ");
+            }
+            return value;
         }
     }
 }
