@@ -53,11 +53,13 @@ namespace MazeGenerator
 
             var sortedList = CreateFullCoordList(newMaze.Walls, newMaze.StartCoord, newMaze.EndCoord, newMaze.Width, newMaze.Height);
 
+            //-- testing features, remove later
             foreach (Coordinate coordinate in sortedList)
             {
-                Console.WriteLine($"{coordinate} {coordinate.Type}");
+                Console.WriteLine(coordinate);
             }
             Console.ReadLine();
+            //-- testing features, remove later
         }
 
         public void CreateMaze()
@@ -204,6 +206,7 @@ namespace MazeGenerator
             {
                 Console.Clear();
                 ListMazes("Which maze would you like to view?");
+
                 var seeMaze = ParseIntput();
 
                 //-- Checks the list of Mazes for the id number the user entered and then prints it
@@ -226,36 +229,46 @@ namespace MazeGenerator
         //-- This method is used to output a visual representation of the maze
         public void PrintMaze(Maze maze)
         {
-            //-- Creates a list of the wall coordinates, along with adding the start and end points
-            List<Coordinate> buildList = maze.Walls.WallCoords;
-            buildList.Add(maze.StartCoord);
-            buildList.Add(maze.EndCoord);
-
             //-- Sorts the new buildList so that it can output correctly
-            List<Coordinate> sortedList = buildList.OrderBy(s => s.XCoord).ThenBy(s => s.YCoord).ToList();
+            List<Coordinate> sortedList = CreateFullCoordList(maze.Walls, maze.StartCoord, maze.EndCoord, maze.Width, maze.Height);
 
             Console.Clear();
             //-- Creates one row at a time, checking each column as it goes
             for (int r = 0; r < maze.Height; r++)
             {
-                for (int c = 0; c < maze.Width; c++)
+                int c = 0;
+                c++;
+                //-- Creates a Coordinate that has the current spot's coordinates
+                Coordinate testCoord = new Coordinate
                 {
-                    Coordinate testCoord = new Coordinate
-                    {
-                        XCoord = r,
-                        YCoord = c
-                    };
+                    XCoord = c,
+                    YCoord = r
+                };
 
-                    //-- Checks the current spot and assigns it the appropriate value
-                    var result = sortedList.Find(x => x.XCoord == c && x.YCoord == r);
-                    if (result != null)
-                    {
-                        if (result.Type == CoordType.Start) Console.Write("SS");
-                        else if (result.Type == CoordType.End) Console.Write("EE");
-                        else Console.Write("[]");
-                    }
+                //-- Checks the current spot and assigns it the appropriate value
+                List<Coordinate> rowList = sortedList.Where(e => e.YCoord == testCoord.YCoord).ToList();
+                foreach (Coordinate coordinate in rowList)
+                {
+                    if (coordinate.Type == CoordType.Start) Console.Write("SS");
+                    else if (coordinate.Type == CoordType.End) Console.Write("EE");
+                    else if (coordinate.Type == CoordType.Wall) Console.Write("[]");
                     else Console.Write("  ");
+
+                    if (coordinate.XCoord > maze.Width)
+                    {
+                        Console.WriteLine();
+                        break;
+                    }
                 }
+
+                //var result = sortedList.Find(x => x.XCoord == c && x.YCoord == r);
+                //if (result != null)
+                //{
+                //    if (result.Type == CoordType.Start) Console.Write("SS");
+                //    else if (result.Type == CoordType.End) Console.Write("EE");
+                //    else Console.Write("[]");
+                //}
+                //else Console.Write("  ");
                 Console.WriteLine();
             }
         }
@@ -335,7 +348,7 @@ namespace MazeGenerator
 
             newCoordList.Add(start);
             newCoordList.Add(end);
-            foreach(Coordinate coordinate in wall.WallCoords)
+            foreach (Coordinate coordinate in wall.WallCoords)
             {
                 newCoordList.Add(coordinate);
             }

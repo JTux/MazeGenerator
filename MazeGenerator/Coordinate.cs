@@ -16,7 +16,7 @@ namespace MazeGenerator
 
         public override string ToString()
         {
-            return $"{XCoord}, {YCoord}";
+            return $"{XCoord}, {YCoord} {Type}";
         }
     }
 }
