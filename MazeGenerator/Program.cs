@@ -14,10 +14,12 @@ namespace MazeGenerator
 
             program.SeedMazeList();
 
-            //program.CreateMaze();
+            program.ViewMaze();
+            Console.ReadLine();
+
+            program.CreateMaze();
 
             program.ViewMaze();
-
             Console.ReadLine();
         }
     }

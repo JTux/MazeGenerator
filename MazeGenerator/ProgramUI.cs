@@ -65,26 +65,26 @@ namespace MazeGenerator
             {
                 Console.Write("Enter maze width: ");
                 mazeWidth = ParseIntput();
-                if (!(mazeWidth < 5)) break;
+                if (mazeWidth > 4) break;
                 else Console.WriteLine("Please enter a width greater than 4.");
             }
             while (sizeCheck)
             {
                 Console.Write("Enter maze height: ");
                 mazeHeight = ParseIntput();
-                if (!(mazeHeight < 5)) break;
+                if (mazeHeight > 4) break;
                 else Console.WriteLine("Please enter a width greater than 4.");
             }
 
             //Uses the CreateCoord helper method to create Coordinates
-            var newStart = CreateCoord("Enter Start Coordinate: ");
-            var newEnd = CreateCoord("Enter End Coordinate: ");
+            var newStart = CreateCoord("Enter Start Coordinate: ", mazeWidth, mazeHeight);
+            var newEnd = CreateCoord("Enter End Coordinate: ", mazeWidth, mazeHeight);
 
             //Updates the mazecount so it can assign each maze a unique ID
             _mazeCount++;
 
             //Calls the method that sets a loop for users to create as many wall objects as they want
-            var newWall = CreateWalls();
+            var newWall = CreateWalls(mazeWidth, mazeHeight);
 
             //Creates the new Maze based on all the values the user has input thus far
             var newMaze = new Maze
@@ -167,7 +167,7 @@ namespace MazeGenerator
 
         }
 
-        private Wall CreateWalls()
+        private Wall CreateWalls(int width, int height)
         {
             var newWall = new Wall();
             var newWallList = new List<Coordinate>();
@@ -180,7 +180,7 @@ namespace MazeGenerator
             while (creatingWalls)
             {
                 //Creates new Coordinate and adds it to the list
-                var newCoord = CreateCoord("Enter position for wall: ");
+                var newCoord = CreateCoord("Enter position for wall: ", width, height);
                 newWallList.Add(newCoord);
 
                 //Check to add another wall coordinate
@@ -211,14 +211,25 @@ namespace MazeGenerator
         }
 
         //Helper method that creates a new Coordinate object
-        private Coordinate CreateCoord(string prompt)
+        private Coordinate CreateCoord(string prompt, int width, int height)
         {
             Console.WriteLine(prompt);
-            Console.Write("X: ");
-            var newX = ParseIntput();
+            int newX = 0;
+            int newY = 0;
 
-            Console.Write("Y: ");
-            var newY = ParseIntput();
+            bool inCheck = false;
+            while (!inCheck)
+            {
+                Console.Write("X: ");
+                newX = ParseIntput();
+                if (!(newX < 0 || newX >= width)) break;
+            }
+            while (!inCheck)
+            {
+                Console.Write("Y: ");
+                newY = ParseIntput();
+                if (!(newY < 0 || newY >= height)) break;
+            }
 
             var newCoord = new Coordinate
             {
@@ -252,6 +263,16 @@ namespace MazeGenerator
                 else Console.Write("Please enter a valid number: ");
             }
             return value;
+        }
+
+        private string CheckSize(Coordinate input, int width, int height)
+        {
+            string output = "";
+
+            if (input.XCoord > width || input.YCoord < 0) output = "Invalid width";
+            if (input.YCoord > height || input.YCoord < 0) output = "";
+
+            return output;
         }
     }
 }
