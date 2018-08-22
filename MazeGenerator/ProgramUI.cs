@@ -9,6 +9,7 @@ namespace MazeGenerator
     class ProgramUI
     {
         private List<Maze> _mazeList = new List<Maze>();
+        private List<Coordinate> _fullList = new List<Coordinate>();
 
         private int _mazeCount = 0;
 
@@ -95,6 +96,10 @@ namespace MazeGenerator
             //-- Calls the method that sets a loop for users to create as many wall objects as they want
             var newWall = CreateWalls(mazeWidth, mazeHeight, newStart, newEnd);
 
+            //-- Creates the entire set of coordinates
+            var fullList = CreateFullCoordList(newWall, newStart, newEnd, mazeWidth, mazeHeight);
+
+
             //-- Creates the new Maze based on all the values the user has input thus far
             var newMaze = new Maze
             {
@@ -114,37 +119,52 @@ namespace MazeGenerator
         //-- Method to create the list of walls that will be passed into the Maze
         private Wall CreateWalls(int width, int height, Coordinate start, Coordinate end)
         {
+            Console.Clear();
+
             var newWall = new Wall();
             var newWallList = new List<Coordinate>();
 
-            Console.Clear();
-
             var prompt = $"Enter Wall Coordinates: \n" +
-                         $"Start:({start})  End:({end})";
+                         $"Start: ({start})  End: ({end}) \n" +
+                         $"Current walls: ";
+
+            Console.WriteLine();
 
             //-- Loops until the user decides they are done creating walls
             var creatingWalls = true;
             while (creatingWalls)
             {
+
                 //-- Creates new Coordinate and adds it to the list
                 Coordinate newCoord = new Coordinate();
 
                 //-- Checks to make sure the user does not create an Wall at the same place they created the Start or End
                 while (true)
                 {
+                    //-- Creates new Coord
                     newCoord = CreateCoord(prompt, width, height, CoordType.Wall);
-                    if ((newCoord.XCoord != start.XCoord || newCoord.YCoord != start.YCoord) && (newCoord.XCoord != end.XCoord || newCoord.YCoord != end.YCoord))
+
+                    //-- Checks to see if this wall exists already
+                    var result = newWallList.Find(x => x.XCoord == newCoord.XCoord && x.YCoord == newCoord.YCoord);
+
+                    //-- Checks to make sure the wall does not sit on
+                    if ((newCoord.XCoord != start.XCoord || newCoord.YCoord != start.YCoord) &&
+                        (newCoord.XCoord != end.XCoord || newCoord.YCoord != end.YCoord) &&
+                        (result == null))
                         break;
-                    Console.WriteLine($"Walls cannot be placed on the Start or End.");
+                    Console.WriteLine($"Cannot place wall because this coordinate is already taken.");
                     Console.ReadLine();
                 }
 
+                //-- Updates prompt to show current list of walls (not sorted yet)
+                prompt = $"{prompt}({newCoord}) ";
                 newWallList.Add(newCoord);
 
+
                 //-- Check to add another wall coordinate
-                var validResponse = true;
-                while (validResponse)
+                while (true)
                 {
+
                     Console.Write("Would you like to add another wall? (Y/N): ");
                     string response = Console.ReadLine().ToLower();
 
@@ -152,7 +172,7 @@ namespace MazeGenerator
                     {
                         //-- Escapes out of adding walls to list
                         creatingWalls = false;
-                        validResponse = false;
+                        break;
                     }
                     else if (response == "y")
                         //-- Returns you to creating walls
@@ -249,7 +269,7 @@ namespace MazeGenerator
         {
             Console.Clear();
             Console.WriteLine(prompt);
-            Console.WriteLine($"Valid values: X: 0 - {width-1}  Y: 0 - {height-1}");
+            Console.WriteLine($"Valid values: X: 0 - {width - 1}  Y: 0 - {height - 1}");
             int newX = 0;
             int newY = 0;
 
@@ -302,6 +322,27 @@ namespace MazeGenerator
                 else Console.Write("Please enter a valid number: ");
             }
             return value;
+        }
+
+        //-- Helper method that finds adjacent coords and returns valid empty types
+        //private List<Coordinate> FindAdjacentCoords() { }
+
+        //-- Helper method that fills out the entire set of coordinates for the maze based on the Start, End, and Walls
+        private List<Coordinate> CreateFullCoordList(Wall wall, Coordinate start, Coordinate end, int width, int height)
+        {
+            var newList = new List<Coordinate>();
+
+            newList.Add(start);
+            newList.Add(end);
+            foreach(Coordinate coordinate in wall.WallCoords)
+            {
+                newList.Add(coordinate);
+            }
+
+
+
+
+            return newList;
         }
 
         //-- Currently not implemented
