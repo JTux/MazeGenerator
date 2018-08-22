@@ -12,6 +12,7 @@ namespace MazeGenerator
 
         private int _mazeCount = 0;
 
+        //-- This method is just used to have a hard coded maze ready to test
         public void SeedMazeList()
         {
             _mazeCount++;
@@ -54,13 +55,13 @@ namespace MazeGenerator
         {
             Console.Clear();
 
-            //The Width and Height are given default values that will be changed
+            //-- The Width and Height are given default values that will be changed
             int mazeWidth = 5;
             int mazeHeight = 5;
 
             var sizeCheck = true;
 
-            //Checks to make sure the width and height are numbers and are not smaller than 5
+            //-- Checks to make sure the width and height are numbers and are not smaller than 5
             while (sizeCheck)
             {
                 Console.Write("Enter maze width: ");
@@ -76,17 +77,25 @@ namespace MazeGenerator
                 else Console.WriteLine("Please enter a width greater than 4.");
             }
 
-            //Uses the CreateCoord helper method to create Coordinates
-            var newStart = CreateCoord("Enter Start Coordinate: ", mazeWidth, mazeHeight);
-            var newEnd = CreateCoord("Enter End Coordinate: ", mazeWidth, mazeHeight);
+            //-- Uses the CreateCoord helper method to create Coordinates
+            var newStart = CreateCoord("Enter Start Coordinate: ", mazeWidth, mazeHeight, CoordType.Start);
 
-            //Updates the mazecount so it can assign each maze a unique ID
+            Coordinate newEnd = new Coordinate();
+            //-- Checks to make sure the user does not create an End point at the same place they created the Start
+            while (true)
+            {
+                newEnd = CreateCoord("Enter End Coordinate: ", mazeWidth, mazeHeight, CoordType.End);
+                if (newEnd.XCoord != newStart.XCoord || newEnd.YCoord != newStart.YCoord) break;
+                Console.WriteLine($"Start and End points cannot be equal. Start located at: ({newStart}).");
+                Console.ReadLine();
+            }
+            //-- Updates the mazecount so it can assign each maze a unique ID
             _mazeCount++;
 
-            //Calls the method that sets a loop for users to create as many wall objects as they want
-            var newWall = CreateWalls(mazeWidth, mazeHeight);
+            //-- Calls the method that sets a loop for users to create as many wall objects as they want
+            var newWall = CreateWalls(mazeWidth, mazeHeight, newStart, newEnd);
 
-            //Creates the new Maze based on all the values the user has input thus far
+            //-- Creates the new Maze based on all the values the user has input thus far
             var newMaze = new Maze
             {
                 MazeID = _mazeCount,
@@ -98,36 +107,46 @@ namespace MazeGenerator
                 Walls = newWall
             };
 
-            //Adds the new maze to the list
+            //-- Adds the new maze to the list
             _mazeList.Add(newMaze);
         }
 
+        //-- Method that can be called by the program to offer a list of mazes and then output the selected one
         public void ViewMaze()
         {
-            Console.Clear();
-            ListMazes("Which maze would you like to view?");
-            var seeMaze = Int32.Parse(Console.ReadLine());
-
-            //Checks the list of Mazes for the id number the user entered and then prints it
-            foreach (Maze maze in _mazeList)
+            var validInput = false;
+            while (!validInput)
             {
                 Console.Clear();
-                if (maze.MazeID == seeMaze)
+                ListMazes("Which maze would you like to view?");
+                var seeMaze = ParseIntput();
+
+                //-- Checks the list of Mazes for the id number the user entered and then prints it
+                foreach (Maze maze in _mazeList)
                 {
-                    //Calls PrintMaze method and passes through the Maze it found that matches the user's request
-                    PrintMaze(maze);
-                    break;
+                    Console.Clear();
+                    if (maze.MazeID == seeMaze)
+                    {
+                        //-- Calls PrintMaze method and passes through the Maze it found that matches the user's request
+                        PrintMaze(maze);
+                        validInput = true;
+                        break;
+                    }
+                    else Console.WriteLine("Maze does not exist");
                 }
-                else Console.WriteLine("Maze does not exist");
+                if (!validInput) Console.ReadLine();
             }
         }
 
+        //-- This method is used to output a visual representation of the maze
         public void PrintMaze(Maze maze)
         {
+            //-- Creates a list of the wall coordinates, along with adding the start and end points
             List<Coordinate> buildList = maze.Walls.WallCoords;
             buildList.Add(maze.StartCoord);
             buildList.Add(maze.EndCoord);
 
+            //-- Sorts the new buildList so that it can output correctly
             List<Coordinate> sortedList = buildList.OrderBy(s => s.XCoord).ThenBy(s => s.YCoord).ToList();
             foreach (Coordinate coord in sortedList)
             {
@@ -135,7 +154,7 @@ namespace MazeGenerator
             }
 
             Console.Clear();
-            //Creates one row at a time, checking each column as it goes
+            //-- Creates one row at a time, checking each column as it goes
             for (int r = 0; r < maze.Height; r++)
             {
                 for (int c = 0; c < maze.Width; c++)
@@ -146,12 +165,12 @@ namespace MazeGenerator
                         YCoord = c
                     };
 
-                    //Checks the current spot and assigns it the appropriate value
+                    //-- Checks the current spot and assigns it the appropriate value
                     var result = sortedList.Find(x => x.XCoord == c && x.YCoord == r);
                     if (result != null)
                     {
-                        if (result.XCoord == maze.StartCoord.XCoord && result.YCoord == maze.StartCoord.YCoord) Console.Write("SS");
-                        else if (result.XCoord == maze.EndCoord.XCoord && result.YCoord == maze.EndCoord.YCoord) Console.Write("EE");
+                        if (result.Type == CoordType.Start) Console.Write("SS");
+                        else if (result.Type == CoordType.End) Console.Write("EE");
                         else Console.Write("[]");
                     }
                     else Console.Write("  ");
@@ -160,6 +179,7 @@ namespace MazeGenerator
             }
         }
 
+        //-- Eventually going to be used to edit the walls along with start and end points
         public void EditMaze()
         {
             Console.Clear();
@@ -167,23 +187,26 @@ namespace MazeGenerator
 
         }
 
-        private Wall CreateWalls(int width, int height)
+        //-- Method to create the list of walls that will be passed into the Maze
+        private Wall CreateWalls(int width, int height, Coordinate start, Coordinate end)
         {
             var newWall = new Wall();
             var newWallList = new List<Coordinate>();
 
             Console.Clear();
-            Console.WriteLine("Let's build a wall! #MakeMazesGreatAgain #NoRagrets");
 
-            //Loops until the user decides they are done creating walls
+            var prompt = $"Enter Wall Coordinates: \n" +
+                         $"Start:({start})  End:({end})";
+
+            //-- Loops until the user decides they are done creating walls
             var creatingWalls = true;
             while (creatingWalls)
             {
-                //Creates new Coordinate and adds it to the list
-                var newCoord = CreateCoord("Enter position for wall: ", width, height);
+                //-- Creates new Coordinate and adds it to the list
+                var newCoord = CreateCoord(prompt, width, height, CoordType.Wall);
                 newWallList.Add(newCoord);
 
-                //Check to add another wall coordinate
+                //-- Check to add another wall coordinate
                 var validResponse = true;
                 while (validResponse)
                 {
@@ -192,66 +215,71 @@ namespace MazeGenerator
 
                     if (response == "n")
                     {
-                        //Escapes out of adding walls to list
+                        //-- Escapes out of adding walls to list
                         creatingWalls = false;
                         validResponse = false;
                     }
                     else if (response == "y")
-                        //Returns you to creating walls
+                        //-- Returns you to creating walls
                         break;
                     else
                         Console.WriteLine("Invalid Input");
                 }
             }
 
-            //Sets new list to the list associated with the Wall
+            //-- Sets new list to the list associated with the Wall
             newWall.WallCoords = newWallList;
 
             return newWall;
         }
 
-        //Helper method that creates a new Coordinate object
-        private Coordinate CreateCoord(string prompt, int width, int height)
+        //-- Helper method that creates a new Coordinate object
+        private Coordinate CreateCoord(string prompt, int width, int height, CoordType type)
         {
+            Console.Clear();
             Console.WriteLine(prompt);
+            Console.WriteLine($"Valid values: X: 0 - {width-1}  Y: 0 - {height-1}");
             int newX = 0;
             int newY = 0;
 
+            //-- Checks to make sure the inputs are valid and within the designated grid area
             bool inCheck = false;
             while (!inCheck)
             {
                 Console.Write("X: ");
                 newX = ParseIntput();
                 if (!(newX < 0 || newX >= width)) break;
+                else Console.WriteLine("Invalid number. Outside of parameters.");
             }
             while (!inCheck)
             {
                 Console.Write("Y: ");
                 newY = ParseIntput();
                 if (!(newY < 0 || newY >= height)) break;
+                else Console.WriteLine("Invalid number. Outside of parameters.");
             }
 
             var newCoord = new Coordinate
             {
                 XCoord = newX,
                 YCoord = newY,
-                Type = CoordType.Wall
+                Type = type
             };
 
             return newCoord;
         }
 
-        //Helper method that prints the id number for each maze
+        //-- Helper method that prints the id number for each maze
         private void ListMazes(string prompt)
         {
             Console.WriteLine(prompt);
             foreach (Maze maze in _mazeList)
             {
-                Console.WriteLine(maze.MazeID);
+                Console.WriteLine($"{maze.MazeID}: {maze.Size}");
             }
         }
 
-        //Helper method that makes sure input is a valid number
+        //-- Helper method that makes sure input is a valid integer
         private int ParseIntput()
         {
             int value;
@@ -265,14 +293,17 @@ namespace MazeGenerator
             return value;
         }
 
-        private string CheckSize(Coordinate input, int width, int height)
-        {
-            string output = "";
+        //-- Currently not implemented
 
-            if (input.XCoord > width || input.YCoord < 0) output = "Invalid width";
-            if (input.YCoord > height || input.YCoord < 0) output = "";
+        ////-- Helper method that checks to make sure coordinates are not outside the designated grid area
+        //private string CheckSize(Coordinate input, int width, int height)
+        //{
+        //    string output = "";
 
-            return output;
-        }
+        //    if (input.XCoord > width || input.YCoord < 0) output = "Invalid width";
+        //    if (input.YCoord > height || input.YCoord < 0) output = "";
+
+        //    return output;
+        //}
     }
 }
