@@ -50,6 +50,14 @@ namespace MazeGenerator
                 }
             };
             _mazeList.Add(newMaze);
+
+            var sortedList = CreateFullCoordList(newMaze.Walls, newMaze.StartCoord, newMaze.EndCoord, newMaze.Width, newMaze.Height);
+
+            foreach (Coordinate coordinate in sortedList)
+            {
+                Console.WriteLine($"{coordinate} {coordinate.Type}");
+            }
+            Console.ReadLine();
         }
 
         public void CreateMaze()
@@ -225,10 +233,6 @@ namespace MazeGenerator
 
             //-- Sorts the new buildList so that it can output correctly
             List<Coordinate> sortedList = buildList.OrderBy(s => s.XCoord).ThenBy(s => s.YCoord).ToList();
-            foreach (Coordinate coord in sortedList)
-            {
-                Console.WriteLine(coord);
-            }
 
             Console.Clear();
             //-- Creates one row at a time, checking each column as it goes
@@ -324,25 +328,43 @@ namespace MazeGenerator
             return value;
         }
 
-        //-- Helper method that finds adjacent coords and returns valid empty types
-        //private List<Coordinate> FindAdjacentCoords() { }
-
         //-- Helper method that fills out the entire set of coordinates for the maze based on the Start, End, and Walls
         private List<Coordinate> CreateFullCoordList(Wall wall, Coordinate start, Coordinate end, int width, int height)
         {
-            var newList = new List<Coordinate>();
+            var newCoordList = new List<Coordinate>();
 
-            newList.Add(start);
-            newList.Add(end);
+            newCoordList.Add(start);
+            newCoordList.Add(end);
             foreach(Coordinate coordinate in wall.WallCoords)
             {
-                newList.Add(coordinate);
+                newCoordList.Add(coordinate);
             }
 
+            //-- Runs through the user input and fills any empty coordinate spots with empty values
+            for (int r = 0; r < height; r++)
+            {
+                for (int c = 0; c < width; c++)
+                {
+                    Coordinate testCoord = new Coordinate
+                    {
+                        XCoord = c,
+                        YCoord = r
+                    };
 
+                    //-- Checks the current spot and assigns it the appropriate value
+                    var result = newCoordList.Find(x => x.XCoord == c && x.YCoord == r);
+                    if (result == null)
+                    {
+                        testCoord.Type = CoordType.Empty;
+                        newCoordList.Add(testCoord);
+                    }
+                }
+            }
 
+            //-- Sorts the list so that it can output correctly
+            List<Coordinate> sortedList = newCoordList.OrderBy(s => s.XCoord).ThenBy(s => s.YCoord).ToList();
 
-            return newList;
+            return sortedList;
         }
 
         //-- Currently not implemented
