@@ -10,6 +10,12 @@ namespace MazeGenerator
     {
         static void Main(string[] args)
         {
+            ProgramUI program = new ProgramUI();
+            program.CreateMaze();
+
+            program.ViewMaze();
+
+            Console.ReadLine();
         }
     }
 }
