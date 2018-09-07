@@ -13,6 +13,7 @@ namespace MazeGenerator
             ProgramUI program = new ProgramUI();
 
             program.SeedMazeList();
+            program.SeedMazeList();
 
             program.ViewMaze();
             Console.ReadLine();
