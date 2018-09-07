@@ -13,10 +13,11 @@ namespace MazeGenerator
         public int XCoord { get; set; }
         public int YCoord { get; set; }
         public CoordType Type { get; set; }
+        public int Value { get; set; }
 
         public override string ToString()
         {
-            return $"{XCoord}, {YCoord} {Type}";
+            return $"({XCoord}, {YCoord}) {Type} {Value}";
         }
     }
 }

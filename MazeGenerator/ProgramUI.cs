@@ -49,17 +49,9 @@ namespace MazeGenerator
                     }
                 }
             };
+            newMaze.FullCoordList = CreateFullCoordList(newMaze.Walls, newMaze.StartCoord, newMaze.EndCoord, newMaze.Width, newMaze.Height);
+            newMaze.FullCoordList = AssignValue(newMaze);
             _mazeList.Add(newMaze);
-
-            var sortedList = CreateFullCoordList(newMaze.Walls, newMaze.StartCoord, newMaze.EndCoord, newMaze.Width, newMaze.Height);
-
-            //-- testing features, remove later
-            foreach (Coordinate coordinate in sortedList)
-            {
-                Console.WriteLine(coordinate);
-            }
-            Console.ReadLine();
-            //-- testing features, remove later
         }
 
         public void CreateMaze()
@@ -100,6 +92,7 @@ namespace MazeGenerator
                 Console.WriteLine($"Start and End points cannot be equal. Start located at: ({newStart}).");
                 Console.ReadLine();
             }
+
             //-- Updates the mazecount so it can assign each maze a unique ID
             _mazeCount++;
 
@@ -108,7 +101,6 @@ namespace MazeGenerator
 
             //-- Creates the entire set of coordinates
             var fullList = CreateFullCoordList(newWall, newStart, newEnd, mazeWidth, mazeHeight);
-
 
             //-- Creates the new Maze based on all the values the user has input thus far
             var newMaze = new Maze
@@ -119,8 +111,11 @@ namespace MazeGenerator
                 Size = $"{mazeWidth.ToString()} x {mazeHeight.ToString()}",
                 StartCoord = newStart,
                 EndCoord = newEnd,
-                Walls = newWall
+                Walls = newWall,
+                FullCoordList = fullList
             };
+
+            AssignValue(newMaze);
 
             //-- Adds the new maze to the list
             _mazeList.Add(newMaze);
@@ -135,7 +130,7 @@ namespace MazeGenerator
             var newWallList = new List<Coordinate>();
 
             var prompt = $"Enter Wall Coordinates: \n" +
-                         $"Start: ({start})  End: ({end}) \n" +
+                         $"Start: ({start.XCoord}, {start.YCoord})  End: ({end.XCoord}, {end.YCoord}) \n" +
                          $"Current walls: ";
 
             Console.WriteLine();
@@ -230,7 +225,6 @@ namespace MazeGenerator
         public void PrintMaze(Maze maze)
         {
             //-- Sorts the new buildList so that it can output correctly
-            List<Coordinate> sortedList = CreateFullCoordList(maze.Walls, maze.StartCoord, maze.EndCoord, maze.Width, maze.Height);
 
             Console.Clear();
             //-- Creates one row at a time, checking each column as it goes
@@ -246,13 +240,15 @@ namespace MazeGenerator
                 };
 
                 //-- Checks the current spot and assigns it the appropriate value
-                List<Coordinate> rowList = sortedList.Where(e => e.YCoord == testCoord.YCoord).ToList();
+                //List<Coordinate> rowList = maze.Walls.WallCoords.Where(e => e.YCoord == testCoord.YCoord).ToList();
+                List<Coordinate> rowList = maze.FullCoordList.Where(e => e.YCoord == testCoord.YCoord).ToList();
                 foreach (Coordinate coordinate in rowList)
                 {
                     if (coordinate.Type == CoordType.Start) Console.Write("SS");
                     else if (coordinate.Type == CoordType.End) Console.Write("EE");
                     else if (coordinate.Type == CoordType.Wall) Console.Write("[]");
-                    else Console.Write("  ");
+                    else if (coordinate.Value > 9) Console.Write(coordinate.Value);
+                    else Console.Write(coordinate.Value + " ");
 
                     if (coordinate.XCoord > maze.Width)
                     {
@@ -261,14 +257,6 @@ namespace MazeGenerator
                     }
                 }
 
-                //var result = sortedList.Find(x => x.XCoord == c && x.YCoord == r);
-                //if (result != null)
-                //{
-                //    if (result.Type == CoordType.Start) Console.Write("SS");
-                //    else if (result.Type == CoordType.End) Console.Write("EE");
-                //    else Console.Write("[]");
-                //}
-                //else Console.Write("  ");
                 Console.WriteLine();
             }
         }
@@ -361,7 +349,7 @@ namespace MazeGenerator
                     Coordinate testCoord = new Coordinate
                     {
                         XCoord = c,
-                        YCoord = r
+                        YCoord = r,
                     };
 
                     //-- Checks the current spot and assigns it the appropriate value
@@ -380,17 +368,73 @@ namespace MazeGenerator
             return sortedList;
         }
 
-        //-- Currently not implemented
+        //-- Helper method that finds the neighbor values and returns a list of neighbors that are blank
+        private List<Coordinate> FindNeighbors(Maze maze, Coordinate coordinate, int value, List<Coordinate> usedCoords)
+        {
+            List<Coordinate> neighbors = new List<Coordinate>();
 
-        ////-- Helper method that checks to make sure coordinates are not outside the designated grid area
-        //private string CheckSize(Coordinate input, int width, int height)
-        //{
-        //    string output = "";
+            Coordinate topCoord;
+            Coordinate rightCoord;
+            Coordinate bottomCoord;
+            Coordinate leftCoord;
 
-        //    if (input.XCoord > width || input.YCoord < 0) output = "Invalid width";
-        //    if (input.YCoord > height || input.YCoord < 0) output = "";
+            //-- Checks coordinates neighboring the input coordinate
+            if (coordinate.XCoord > 0 && !(usedCoords.Contains(coordinate)))
+                neighbors.Add(leftCoord = new Coordinate { XCoord = (coordinate.XCoord - 1), YCoord = coordinate.YCoord, Value = value });
+            if (coordinate.XCoord < (maze.Width - 1) && !(usedCoords.Contains(coordinate)))
+                neighbors.Add(rightCoord = new Coordinate { XCoord = (coordinate.XCoord + 1), YCoord = coordinate.YCoord, Value = value });
+            if (coordinate.YCoord > 0 && !(usedCoords.Contains(coordinate)))
+                neighbors.Add(topCoord = new Coordinate { XCoord = coordinate.XCoord, YCoord = (coordinate.YCoord - 1), Value = value });
+            if (coordinate.YCoord < (maze.Height - 1) && !(usedCoords.Contains(coordinate)))
+                neighbors.Add(bottomCoord = new Coordinate { XCoord = coordinate.XCoord, YCoord = (coordinate.YCoord + 1), Value = value });
 
-        //    return output;
-        //}
+            return neighbors;
+        }
+
+        //-- Helper method that assigns a value based on distance from End Coordinate
+        private List<Coordinate> AssignValue(Maze maze)
+        {
+            var completeList = maze.FullCoordList;
+            var usedCoords = new List<Coordinate>();
+            usedCoords.Add(maze.StartCoord);
+            var newNeighbors = new List<Coordinate>();
+            var nextNeighbors = new List<Coordinate>();
+
+            var value = 0;
+            var neighbors = FindNeighbors(maze, maze.EndCoord, value, usedCoords);
+
+            var emptySpacesCount = completeList.Count(x => x.Type == CoordType.Empty);
+
+            //-- For every tile in the grid?
+            for (int i = 0; i < emptySpacesCount; i++)
+            {
+                value++;
+                foreach (Coordinate neighbor in neighbors)
+                {
+                    var currentCoord = completeList.Find(x => x.XCoord == neighbor.XCoord && x.YCoord == neighbor.YCoord);
+                    var checkCoord = (usedCoords.Find(c => c.XCoord == currentCoord.XCoord && c.YCoord == currentCoord.YCoord));
+                    if (checkCoord == null && currentCoord != null && currentCoord.Type == CoordType.Empty)
+                    {
+                        currentCoord.Value = value;
+                        //newNeighbors.Add(neighbor);
+                        nextNeighbors = FindNeighbors(maze, neighbor, value, usedCoords);
+                        foreach (Coordinate nextNeighbor in nextNeighbors)
+                        {
+                            newNeighbors.Add(nextNeighbor);
+                        }
+                    }
+                    if (checkCoord == null) usedCoords.Add(neighbor);
+                }
+                neighbors.Clear();
+
+                foreach (Coordinate newNeighbor in newNeighbors)
+                    neighbors.Add(newNeighbor);
+
+                newNeighbors.Clear();
+            }
+
+
+            return completeList;
+        }
     }
 }
