@@ -167,13 +167,20 @@ namespace MazeGenerator
         private void PrintMaze(Maze maze)
         {
             Console.Clear();
+            var borderWall = "//";
 
             //-- Creates one row at a time, checking each column as it goes
-            for (int r = 0; r < maze.Height; r++)
+            for (int r = 0; r <= maze.Height; r++)
             {
                 int c = 0;
                 c++;
 
+                if (r == 0)
+                {
+                    for (int x = 0; x <= maze.Width; x++) Console.Write(borderWall);
+                    Console.WriteLine(borderWall);
+                }
+                Console.Write(borderWall);
                 //-- Checks the current spot and assigns it the appropriate value
                 List<Coordinate> rowList = maze.FullCoordList.Where(e => e.YCoord == r).ToList();
                 foreach (Coordinate coordinate in rowList)
@@ -184,8 +191,8 @@ namespace MazeGenerator
                     else if (coordinate.Value > 9) Console.Write(coordinate.Value);
                     else Console.Write(" " + coordinate.Value);
                 }
-
-                Console.WriteLine();
+                if (r == maze.Height) for (int x = 0; x < maze.Width; x++) Console.Write(borderWall);
+                Console.WriteLine(borderWall);
             }
         }
 
