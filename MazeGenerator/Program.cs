@@ -11,17 +11,7 @@ namespace MazeGenerator
         static void Main(string[] args)
         {
             ProgramUI program = new ProgramUI();
-
-            program.SeedMazeList();
-            program.SeedMazeList();
-
-            program.ViewMaze();
-            Console.ReadLine();
-
-            program.CreateMaze();
-
-            program.ViewMaze();
-            Console.ReadLine();
+            program.Run();
         }
     }
 }
