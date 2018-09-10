@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Commentless.cs" />
     <Compile Include="Coordinate.cs" />
     <Compile Include="Maze.cs" />
     <Compile Include="MazeRepository.cs" />

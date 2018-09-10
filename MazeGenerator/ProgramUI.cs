@@ -46,7 +46,7 @@ namespace MazeGenerator
                         mazeRepo.EditMaze();
                         break;
                     case 4:
-                        mazeRepo.EditMaze();
+                        mazeRepo.DeleteMaze();
                         break;
                     case 5:
                         Console.Clear();

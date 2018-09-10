@@ -11,9 +11,9 @@ namespace MazeGenerator
         List<Maze> _mazeList = new List<Maze>();
         private int _mazeCount = 0;
 
-        readonly int minMazeWidth = 5;
+        readonly int minMazeWidth = 4;
         readonly int maxMazeWidth = 100;
-        readonly int minMazeHeight = 5;
+        readonly int minMazeHeight = 4;
         readonly int maxMazeHeight = 100;
 
         //-- This method is just used to have a hard coded maze ready to test
@@ -64,8 +64,7 @@ namespace MazeGenerator
             Console.Clear();
 
             //-- The Width and Height are given default values that will be changed
-            int mazeWidth = 5;
-            int mazeHeight = 5;
+            int mazeWidth, mazeHeight;
 
             //-- Checks to make sure the width and height are numbers and are not smaller than 5
             while (true)
@@ -161,6 +160,15 @@ namespace MazeGenerator
         {
             Console.Clear();
             ListMazes("Which maze would you like to edit?");
+            Console.ReadLine();
+        }
+
+        //-- Eventually going to be used to edit the walls along with start and end points
+        public void DeleteMaze()
+        {
+            Console.Clear();
+            ListMazes("Which maze would you like to delete?");
+            Console.ReadLine();
         }
 
         //-- This method is used to output a visual representation of the maze
@@ -264,7 +272,7 @@ namespace MazeGenerator
         private List<Coordinate> AssignValue(Maze maze)
         {
             var completeList = maze.FullCoordList;
-            var usedCoords = new List<Coordinate> { maze.StartCoord };
+            var usedCoords = new List<Coordinate>();
             var newNeighbors = new List<Coordinate>();
             var nextNeighbors = new List<Coordinate>();
 
@@ -279,18 +287,29 @@ namespace MazeGenerator
                 value++;
                 foreach (Coordinate neighbor in neighbors)
                 {
+                    var isStartCoord = false;
+                    var addValue = false;
                     var currentCoord = completeList.Find(x => x.XCoord == neighbor.XCoord && x.YCoord == neighbor.YCoord);
+
                     var checkCoord = (usedCoords.Find(c => c.XCoord == currentCoord.XCoord && c.YCoord == currentCoord.YCoord));
-                    if (checkCoord == null)
+
+                    if (neighbor.XCoord == maze.StartCoord.XCoord && neighbor.YCoord == maze.StartCoord.YCoord)
+                        isStartCoord = true;
+
+                    if (checkCoord == null || isStartCoord == true)
+                        addValue = true;
+
+                    if (addValue)
                     {
-                        if (currentCoord != null && currentCoord.Type == CoordType.Empty)
+                        if (currentCoord != null && (currentCoord.Type == CoordType.Empty || currentCoord.Type == CoordType.Start))
                         {
                             currentCoord.Value = value;
                             nextNeighbors = FindNeighbors(maze, neighbor, value, usedCoords);
 
                             foreach (Coordinate nextNeighbor in nextNeighbors)
                             {
-                                newNeighbors.Add(nextNeighbor);
+                                if(newNeighbors.Find(c=>c.XCoord == nextNeighbor.XCoord && c.YCoord == nextNeighbor.YCoord) == null)
+                                    newNeighbors.Add(nextNeighbor);
                             }
 
                             usedCoords.Add(neighbor);
