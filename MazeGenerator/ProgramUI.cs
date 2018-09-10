@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MazeGenerator
@@ -51,7 +52,8 @@ namespace MazeGenerator
                     case 5:
                         Console.Clear();
                         Console.WriteLine("Goodbye!");
-                        running = false;
+                        Thread.Sleep(1000);
+                        Environment.Exit(0);
                         break;
                 }
             }

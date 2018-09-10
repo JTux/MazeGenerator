@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MazeGenerator
@@ -129,46 +130,81 @@ namespace MazeGenerator
         //-- Method that can be called by the program to offer a list of mazes and then output the selected one
         public void ViewMaze()
         {
-            var validInput = false;
-            while (!validInput)
+            Console.Clear();
+            if (_mazeList.Count > 0)
             {
-                Console.Clear();
-                ListMazes("Which maze would you like to view?");
-
-                var seeMaze = ParseIntput();
-
-                //-- Checks the list of Mazes for the id number the user entered and then prints it
-                foreach (Maze maze in _mazeList)
+                var validInput = false;
+                while (!validInput)
                 {
-                    Console.Clear();
-                    if (maze.MazeID == seeMaze)
+                    ListMazes("Which maze would you like to view?");
+
+                    var seeMaze = ParseIntput();
+
+                    //-- Checks the list of Mazes for the id number the user entered and then prints it
+                    foreach (Maze maze in _mazeList)
                     {
-                        //-- Calls PrintMaze method and passes through the Maze it found that matches the user's request
-                        PrintMaze(maze);
-                        validInput = true;
-                        break;
+                        Console.Clear();
+                        if (maze.MazeID == seeMaze)
+                        {
+                            //-- Calls PrintMaze method and passes through the Maze it found that matches the user's request
+                            PrintMaze(maze);
+                            validInput = true;
+                            break;
+                        }
+                        else Console.WriteLine("Maze does not exist");
                     }
-                    else Console.WriteLine("Maze does not exist");
+                    if (!validInput) Console.ReadLine();
                 }
-                if (!validInput) Console.ReadLine();
+                Console.ReadLine();
             }
-            Console.ReadLine();
+            else
+            {
+                Console.WriteLine("No existing mazes.");
+                Console.ReadLine();
+            }
         }
 
         //-- Eventually going to be used to edit the walls along with start and end points
         public void EditMaze()
         {
             Console.Clear();
-            ListMazes("Which maze would you like to edit?");
-            Console.ReadLine();
+            if (_mazeList.Count > 0)
+            {
+                ListMazes("Which maze would you like to edit?");
+                Console.ReadLine();
+            }
+            else
+            {
+                Console.WriteLine("No existing mazes.");
+                Console.ReadLine();
+            }
         }
 
         //-- Eventually going to be used to edit the walls along with start and end points
         public void DeleteMaze()
         {
             Console.Clear();
-            ListMazes("Which maze would you like to delete?");
-            Console.ReadLine();
+            if (_mazeList.Count > 0)
+            {
+                ListMazes("Which maze would you like to delete?");
+                var input = ParseIntput();
+                foreach (Maze maze in _mazeList)
+                {
+                    if (maze.MazeID == input)
+                    {
+                        _mazeList.Remove(maze);
+                        Console.Clear();
+                        Console.WriteLine($"Maze {input} deleted.");
+                        break;
+                    }
+                }
+                Thread.Sleep(1500);
+            }
+            else
+            {
+                Console.WriteLine("No existing mazes.");
+                Thread.Sleep(1500);
+            }
         }
 
         //-- This method is used to output a visual representation of the maze
@@ -308,7 +344,7 @@ namespace MazeGenerator
 
                             foreach (Coordinate nextNeighbor in nextNeighbors)
                             {
-                                if(newNeighbors.Find(c=>c.XCoord == nextNeighbor.XCoord && c.YCoord == nextNeighbor.YCoord) == null)
+                                if (newNeighbors.Find(c => c.XCoord == nextNeighbor.XCoord && c.YCoord == nextNeighbor.YCoord) == null)
                                     newNeighbors.Add(nextNeighbor);
                             }
 
