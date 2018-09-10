@@ -188,17 +188,25 @@ namespace MazeGenerator
             {
                 ListMazes("Which maze would you like to delete?");
                 var input = ParseIntput();
-                foreach (Maze maze in _mazeList)
+                if (_mazeList.FirstOrDefault(m => m.MazeID == input) != null)
                 {
-                    if (maze.MazeID == input)
+                    foreach (Maze maze in _mazeList)
                     {
-                        _mazeList.Remove(maze);
-                        Console.Clear();
-                        Console.WriteLine($"Maze {input} deleted.");
-                        break;
+                        if (maze.MazeID == input)
+                        {
+                            _mazeList.Remove(maze);
+                            Console.Clear();
+                            Console.WriteLine($"Maze {input} deleted.");
+                            break;
+                        }
                     }
+                    Thread.Sleep(1500);
                 }
-                Thread.Sleep(1500);
+                else
+                {
+                    Console.WriteLine("Maze does not exist.");
+                    Console.ReadLine();
+                }
             }
             else
             {

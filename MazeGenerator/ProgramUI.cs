@@ -52,7 +52,7 @@ namespace MazeGenerator
                     case 5:
                         Console.Clear();
                         Console.WriteLine("Goodbye!");
-                        Thread.Sleep(1000);
+                        Thread.Sleep(600);
                         Environment.Exit(0);
                         break;
                 }
