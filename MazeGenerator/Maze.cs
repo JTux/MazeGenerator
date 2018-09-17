@@ -19,6 +19,8 @@ namespace MazeGenerator
         public Coordinate EndCoord { get; set; }
         public Wall Walls { get; set; }
 
+        public Coordinate PlayerPosition { get; set; }
+
         public List<Coordinate> FullCoordList { get; set; }
     }
 }

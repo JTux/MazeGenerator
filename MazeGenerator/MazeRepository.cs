@@ -56,6 +56,7 @@ namespace MazeGenerator
             //-- Required because it does not go through the Create method
             newMaze.FullCoordList = CreateFullCoordList(newMaze.Walls, newMaze.StartCoord, newMaze.EndCoord, newMaze.Width, newMaze.Height);
             newMaze.FullCoordList = AssignValue(newMaze);
+            newMaze.PlayerPosition = newMaze.StartCoord;
             _mazeList.Add(newMaze);
         }
 
@@ -122,6 +123,7 @@ namespace MazeGenerator
 
             //-- Runs the new maze through a method that calculates the distance from the start to the finish coordinates
             AssignValue(newMaze);
+            newMaze.PlayerPosition = newMaze.StartCoord;
 
             //-- Adds the new maze to the list
             _mazeList.Add(newMaze);
@@ -211,13 +213,15 @@ namespace MazeGenerator
             else
             {
                 Console.WriteLine("No existing mazes.");
-                Thread.Sleep(1500);
+                Thread.Sleep(1000);
             }
         }
 
         //-- This method is used to output a visual representation of the maze
         private void PrintMaze(Maze maze)
         {
+            ConsoleColor wallColor = ConsoleColor.Red;
+
             Console.Clear();
             var borderWall = "//";
 
@@ -229,7 +233,9 @@ namespace MazeGenerator
 
                 if (r == 0)
                 {
+                    Console.ForegroundColor = wallColor;
                     for (int x = 0; x <= maze.Width; x++) Console.Write(borderWall);
+                    Console.ForegroundColor = wallColor;
                     Console.WriteLine(borderWall);
                 }
                 Console.Write(borderWall);
@@ -241,8 +247,11 @@ namespace MazeGenerator
                     Console.ForegroundColor = ConsoleColor.Gray;
                 }
                 if (r == maze.Height) for (int x = 0; x < maze.Width; x++) Console.Write(borderWall);
+                Console.ForegroundColor = wallColor;
                 Console.WriteLine(borderWall);
             }
+            Console.ForegroundColor = ConsoleColor.Gray;
+
         }
 
         public List<Maze> GetMazeList()
