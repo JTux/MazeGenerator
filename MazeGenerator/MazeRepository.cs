@@ -13,9 +13,9 @@ namespace MazeGenerator
         private int _mazeCount = 0;
 
         readonly int minMazeWidth = 4;
-        readonly int maxMazeWidth = 100;
+        readonly int maxMazeWidth = 30;
         readonly int minMazeHeight = 4;
-        readonly int maxMazeHeight = 100;
+        readonly int maxMazeHeight = 30;
 
         //-- This method is just used to have a hard coded maze ready to test
         public void SeedMazeList()
@@ -237,11 +237,8 @@ namespace MazeGenerator
                 List<Coordinate> rowList = maze.FullCoordList.Where(e => e.YCoord == r).ToList();
                 foreach (Coordinate coordinate in rowList)
                 {
-                    if (coordinate.Type == CoordType.Start) Console.Write("SS");
-                    else if (coordinate.Type == CoordType.End) Console.Write("EE");
-                    else if (coordinate.Type == CoordType.Wall) Console.Write("[]");
-                    else if (coordinate.Value > 9) Console.Write(coordinate.Value);
-                    else Console.Write(" " + coordinate.Value);
+                    Console.Write(GetCoordOutput(coordinate));
+                    Console.ForegroundColor = ConsoleColor.Gray;
                 }
                 if (r == maze.Height) for (int x = 0; x < maze.Width; x++) Console.Write(borderWall);
                 Console.WriteLine(borderWall);
@@ -252,6 +249,38 @@ namespace MazeGenerator
         {
             return _mazeList;
         }
+
+        //-- Helper methods that decide output for each coordinate
+        private string GetCoordOutput(Coordinate input)
+        {
+            string output = "77";
+            var inputType = input.Type;
+
+            switch (inputType)
+            {
+                case CoordType.Start:
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                    output = "SS";
+                    break;
+                case CoordType.End:
+                    Console.ForegroundColor = ConsoleColor.Yellow;
+                    output = "EE";
+                    break;
+                case CoordType.Wall:
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    output = "[]";
+                    break;
+                case CoordType.Empty:
+                    Console.ForegroundColor = ConsoleColor.White;
+                    if (input.Value > 9) output = (input.Value).ToString();
+                    else output = (" " + (input.Value).ToString());
+                    break;
+            }
+
+            return output;
+        }
+
+
 
         //-- Helper method that fills out the entire set of coordinates for the maze based on the Start, End, and Walls
         private List<Coordinate> CreateFullCoordList(Wall wall, Coordinate start, Coordinate end, int width, int height)
